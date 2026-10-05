@@ -8,33 +8,62 @@
 </head>
 <body>
     <div class="container">
-        <!-- Левая колонка: Управление и вызовы методов -->
+        <!-- Левая колонка: Управление -->
         <div class="controls">
-            <div class="form-group">
-                <input type="text" id="idInstance" placeholder="idInstance" autocomplete="off">
-                <input type="password" id="ApiTokenInstance" placeholder="ApiTokenInstance" autocomplete="off" spellcheck="false">
+            
+            <!-- Карточка: Авторизация и состояние -->
+            <div class="card">
+                <h3 class="card-title">Авторизация и состояние</h3>
+                
+                <div class="floating-group">
+                    <input type="text" id="idInstance" class="floating-input" placeholder=" " autocomplete="off">
+                    <label for="idInstance" class="floating-label">ID инстанса (idInstance)*</label>
+                </div>
+                <div class="floating-group">
+                    <input type="password" id="ApiTokenInstance" class="floating-input" placeholder=" " autocomplete="off" spellcheck="false">
+                    <label for="ApiTokenInstance" class="floating-label">API Токен (ApiTokenInstance)*</label>
+                </div>
+                
+                <div class="button-group">
+                    <button id="btn-getSettings" type="button">Получить настройки (getSettings)</button>
+                    <button id="btn-getStateInstance" type="button">Проверить статус (getStateInstance)</button>
+                </div>
             </div>
 
-            <button id="btn-getSettings" type="button">getSettings</button>
-            <button id="btn-getStateInstance" type="button">getStateInstance</button>
-
-            <div class="form-group">
-                <input type="text" id="chatIdMessage" placeholder="77771234567">
-                <textarea id="messageText" placeholder="Hello World!"></textarea>
-                <button id="btn-sendMessage" type="button">sendMessage</button>
+            <!-- Карточка: Отправка сообщения -->
+            <div class="card">
+                <h3 class="card-title">Отправка сообщения</h3>
+                <div class="floating-group">
+                    <input type="text" id="chatIdMessage" class="floating-input" placeholder=" ">
+                    <label for="chatIdMessage" class="floating-label">Номер телефона (chatId)*</label>
+                </div>
+                <div class="floating-group">
+                    <textarea id="messageText" class="floating-input textarea-input" placeholder=" "></textarea>
+                    <label for="messageText" class="floating-label">Текст сообщения*</label>
+                </div>
+                <button id="btn-sendMessage" type="button">Отправить сообщение (sendMessage)</button>
             </div>
 
-            <div class="form-group">
-                <input type="text" id="chatIdFile" placeholder="77771234567">
-                <input type="text" id="fileUrl" placeholder="https://my.site.com/img/horse.png">
-                <button id="btn-sendFileByUrl" type="button">sendFileByUrl</button>
+            <!-- Карточка: Отправка файла -->
+            <div class="card">
+                <h3 class="card-title">Отправка файла по URL</h3>
+                <div class="floating-group">
+                    <input type="text" id="chatIdFile" class="floating-input" placeholder=" ">
+                    <label for="chatIdFile" class="floating-label">Номер телефона (chatId)*</label>
+                </div>
+                <div class="floating-group">
+                    <input type="text" id="fileUrl" class="floating-input" placeholder=" ">
+                    <label for="fileUrl" class="floating-label">Ссылка на файл (urlFile)*</label>
+                </div>
+                <button id="btn-sendFileByUrl" type="button">Отправить файл (sendFileByUrl)</button>
             </div>
+            
         </div>
 
-        <!-- Правая колонка: Вывод ответа -->
+        <!-- Правая колонка: Результат (Терминал) -->
         <div class="result">
-            <label for="apiResponse">Ответ</label>
-            <textarea id="apiResponse" readonly placeholder="Здесь будет отображен JSON-ответ метода..."></textarea>
+            <h3 class="card-title terminal-title">Ответ сервера (JSON)</h3>
+            <textarea id="apiResponse" readonly placeholder="Ожидание запроса..."></textarea>
         </div>
     </div>
 

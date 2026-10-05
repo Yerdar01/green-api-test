@@ -5,109 +5,168 @@
 
 body {
     margin: 0;
-    padding: 30px;
-    background-color: #f0f2f5;
+    padding: 30px 15px;
+    background-color: #f4f6f8;
     color: #333;
 }
 
 .container {
     display: flex;
     gap: 30px;
-    max-width: 950px;
+    max-width: 1100px;
     margin: 0 auto;
-    background: #ffffff;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    align-items: flex-start;
 }
 
+/* Колонки и карточки */
 .controls {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
 .result {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    background: #1e1e1e; /* Темный фон терминала */
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 30px;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.card {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
-label {
-    font-size: 14px;
+.card-title {
+    margin: 0 0 20px 0;
+    font-size: 16px;
     font-weight: 600;
-    color: #555;
+    color: #444;
 }
 
-input, textarea {
-    padding: 10px 12px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    outline: none;
-    transition: border-color 0.2s;
+.terminal-title {
+    color: #858585;
+    margin-bottom: 12px;
+}
+
+/* Плавающие лейблы (Floating Labels) */
+.floating-group {
+    position: relative;
+    margin-bottom: 20px;
     width: 100%;
 }
 
-input:focus, textarea:focus {
-    border-color: #00a884;
+.floating-input {
+    width: 100%;
+    padding: 16px 14px;
+    font-size: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: transparent; /* Важно для перекрытия линий */
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    color: #333;
 }
 
-textarea {
+.textarea-input {
     resize: vertical;
+    min-height: 100px;
 }
 
-#messageText {
-    min-height: 70px;
+.floating-label {
+    position: absolute;
+    top: 16px;
+    left: 14px;
+    font-size: 15px;
+    color: #888;
+    background-color: #ffffff; /* Перекрывает границу input */
+    padding: 0 4px;
+    pointer-events: none;
+    transition: 0.2s ease all;
 }
 
-#apiResponse {
-    flex: 1;
-    min-height: 420px;
-    background-color: #f8f9fa;
-    border: 1px solid #dcdcdc;
-    font-family: "Courier New", Courier, monospace;
-    font-size: 13px;
-    line-height: 1.4;
-    color: #222;
+/* Состояние фокуса - Красный цвет как на референсе */
+.floating-input:focus {
+    border-color: #00a884; 
+}
+
+/* Перемещение лейбла вверх (при фокусе или наличии текста) */
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+    top: -9px;
+    font-size: 12px;
+    color: #00a884; 
+    font-weight: 500;
+}
+
+/* Кнопки */
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 button {
-    padding: 10px 16px;
-    font-size: 14px;
+    padding: 14px 20px;
+    font-size: 15px;
     font-weight: 600;
-    background-color: #00a884;
+    background-color: #00a884; /* Фирменный зеленый */
     color: #ffffff;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
-    align-self: flex-start;
+    transition: background-color 0.2s, transform 0.1s;
     width: 100%;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     background-color: #008f70;
 }
 
-button:active {
-    background-color: #007a60;
+button:active:not(:disabled) {
+    transform: translateY(1px);
 }
 
-@media (max-width: 768px) {
+button:disabled {
+    background-color: #a5d6c3;
+    cursor: not-allowed;
+}
+
+/* Текстовое поле ответа (Терминал) */
+#apiResponse {
+    width: 100%;
+    min-height: 550px;
+    background-color: transparent;
+    border: none;
+    color: #10b981; /* Зеленый текст хакера */
+    font-family: "Fira Code", "Courier New", Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    outline: none;
+    resize: none;
+}
+
+#apiResponse::placeholder {
+    color: #555;
+}
+
+@media (max-width: 900px) {
     .container {
         flex-direction: column;
     }
-    
+    .result {
+        position: static;
+        min-height: 400px;
+    }
     #apiResponse {
-        min-height: 250px;
+        min-height: 350px;
     }
 }

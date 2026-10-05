@@ -1,14 +1,32 @@
-// Константы
 const API_HOST = 'https://api.green-api.com';
 
-// Селекторы DOM-элементов
 const idInstanceInput = document.getElementById('idInstance');
 const apiTokenInput = document.getElementById('ApiTokenInstance');
 const apiResponseOutput = document.getElementById('apiResponse');
 
+// === НОВОЕ: Загрузка сохраненных данных при старте ===
+function loadCredentials() {
+    const savedId = localStorage.getItem('greenApi_idInstance');
+    const savedToken = localStorage.getItem('greenApi_apiToken');
+    
+    if (savedId) idInstanceInput.value = savedId;
+    if (savedToken) apiTokenInput.value = savedToken;
+}
+
+// === НОВОЕ: Автоматическое сохранение при вводе ===
+idInstanceInput.addEventListener('input', (e) => {
+    localStorage.setItem('greenApi_idInstance', e.target.value);
+});
+
+apiTokenInput.addEventListener('input', (e) => {
+    localStorage.setItem('greenApi_apiToken', e.target.value);
+});
+
+// Вызываем загрузку данных сразу при запуске скрипта
+loadCredentials();
+
 /**
- * Форматирует и выводит данные в правую текстовую область (только для чтения).
- * @param {Object|String} data
+ * Выводит данные в консоль (правую панель)
  */
 function printResponse(data) {
     if (typeof data === 'object') {
@@ -19,30 +37,30 @@ function printResponse(data) {
 }
 
 /**
- * Валидирует и подготавливает chatId для WhatsApp API.
- * Если передан только номер (например, 77771234567), добавляет постфикс @c.us.
- * @param {String} input
- * @returns {String|null}
+ * Управление состоянием кнопки (Loading)
  */
+function setLoadingState(buttonId, isLoading) {
+    const button = document.getElementById(buttonId);
+    if (!button) return;
+    
+    if (isLoading) {
+        button.dataset.originalText = button.textContent;
+        button.textContent = 'Загрузка...';
+        button.disabled = true;
+    } else {
+        button.textContent = button.dataset.originalText;
+        button.disabled = false;
+    }
+}
+
 function sanitizeChatId(input) {
     const trimmed = input.trim();
     if (!trimmed) return null;
-
-    // Очищаем от лишних символов (пробелы, тире, плюс)
     const digitsOnly = trimmed.replace(/[^\d]/g, '');
-
-    if (trimmed.includes('@c.us') || trimmed.includes('@g.us')) {
-        return trimmed;
-    }
-
+    if (trimmed.includes('@c.us') || trimmed.includes('@g.us')) return trimmed;
     return digitsOnly ? `${digitsOnly}@c.us` : null;
 }
 
-/**
- * Проверяет корректность введенной URL-ссылки.
- * @param {String} urlString
- * @returns {Boolean}
- */
 function isValidHttpUrl(urlString) {
     try {
         const url = new URL(urlString);
@@ -53,26 +71,19 @@ function isValidHttpUrl(urlString) {
 }
 
 /**
- * Универсальный метод отправки запросов к GREEN-API.
- * @param {String} methodName 
- * @param {String} httpMethod 
- * @param {Object|null} payload 
+ * Универсальная функция запроса с обработкой состояния кнопок
  */
-async function makeApiRequest(methodName, httpMethod = 'GET', payload = null) {
+async function makeApiRequest(methodName, httpMethod = 'GET', payload = null, buttonId = null) {
     const idInstance = idInstanceInput.value.trim();
     const apiToken = apiTokenInput.value.trim();
 
     if (!idInstance || !apiToken) {
-        printResponse({ error: 'Заполните поля idInstance и ApiTokenInstance' });
-        return;
+        printResponse({ error: 'Пожалуйста, заполните данные авторизации (ID и Токен)' });
+        return null; // Возвращаем null при ошибке
     }
 
     const url = `${API_HOST}/waInstance${idInstance}/${methodName}/${apiToken}`;
-
-    const requestOptions = {
-        method: httpMethod,
-        headers: {}
-    };
+    const requestOptions = { method: httpMethod, headers: {} };
 
     if (payload) {
         requestOptions.headers['Content-Type'] = 'application/json';
@@ -81,79 +92,79 @@ async function makeApiRequest(methodName, httpMethod = 'GET', payload = null) {
 
     try {
         printResponse('Отправка запроса...');
+        if (buttonId) setLoadingState(buttonId, true);
 
         const response = await fetch(url, requestOptions);
         const result = await response.json();
-
+        
         printResponse(result);
+        return result; // НОВОЕ: Возвращаем результат для кнопок отправки
     } catch (error) {
         printResponse({
             error: 'Ошибка при выполнении сетевого запроса',
             details: error.message
         });
+        return null;
+    } finally {
+        if (buttonId) setLoadingState(buttonId, false);
     }
 }
 
-// ==========================================
-// Обработчики событий кнопок
-// ==========================================
+// === Обработчики событий ===
 
-// 1. Метод getSettings
-document.getElementById('btn-getSettings').addEventListener('click', () => {
-    makeApiRequest('getSettings', 'GET');
+document.getElementById('btn-getSettings').addEventListener('click', (e) => {
+    makeApiRequest('getSettings', 'GET', null, e.target.id);
 });
 
-// 2. Метод getStateInstance
-document.getElementById('btn-getStateInstance').addEventListener('click', () => {
-    makeApiRequest('getStateInstance', 'GET');
+document.getElementById('btn-getStateInstance').addEventListener('click', (e) => {
+    makeApiRequest('getStateInstance', 'GET', null, e.target.id);
 });
 
-// 3. Метод sendMessage
-document.getElementById('btn-sendMessage').addEventListener('click', () => {
+// НОВОЕ: Сделали функцию асинхронной (async), чтобы дождаться ответа
+document.getElementById('btn-sendMessage').addEventListener('click', async (e) => {
     const rawChatId = document.getElementById('chatIdMessage').value;
-    const message = document.getElementById('messageText').value.trim();
-
+    const messageInput = document.getElementById('messageText');
+    const message = messageInput.value.trim();
     const chatId = sanitizeChatId(rawChatId);
 
-    if (!chatId) {
-        printResponse({ error: 'Укажите корректный номер телефона / chatId' });
+    if (!chatId || !message) {
+        printResponse({ error: 'Заполните номер телефона и текст сообщения' });
         return;
     }
 
-    if (!message) {
-        printResponse({ error: 'Введите текст сообщения' });
-        return;
+    // Ждем результат выполнения запроса
+    const result = await makeApiRequest('sendMessage', 'POST', { chatId, message }, e.target.id);
+    
+    // Если сервер вернул idMessage (сообщение успешно отправлено), очищаем поле текста
+    if (result && result.idMessage) {
+        messageInput.value = '';
     }
-
-    makeApiRequest('sendMessage', 'POST', {
-        chatId: chatId,
-        message: message
-    });
 });
 
-// 4. Метод sendFileByUrl
-document.getElementById('btn-sendFileByUrl').addEventListener('click', () => {
+// НОВОЕ: Сделали функцию асинхронной (async)
+document.getElementById('btn-sendFileByUrl').addEventListener('click', async (e) => {
     const rawChatId = document.getElementById('chatIdFile').value;
-    const fileUrl = document.getElementById('fileUrl').value.trim();
-
+    const fileUrlInput = document.getElementById('fileUrl');
+    const fileUrl = fileUrlInput.value.trim();
     const chatId = sanitizeChatId(rawChatId);
 
     if (!chatId) {
-        printResponse({ error: 'Укажите корректный номер телефона / chatId' });
+        printResponse({ error: 'Укажите корректный номер телефона' });
         return;
     }
 
     if (!fileUrl || !isValidHttpUrl(fileUrl)) {
-        printResponse({ error: 'Укажите корректный URL файла (начинающийся с http:// или https://)' });
+        printResponse({ error: 'Укажите корректную ссылку на файл' });
         return;
     }
 
-    // Извлекаем имя файла из URL или задаем дефолтное
-    const fileName = fileUrl.substring(fileUrl.lastIndexOf('/') + 1) || 'file';
-
-    makeApiRequest('sendFileByUrl', 'POST', {
-        chatId: chatId,
-        urlFile: fileUrl,
-        fileName: fileName
-    });
+    const fileName = fileUrl.substring(fileUrl.lastIndexOf('/') + 1) || 'file.ext';
+    
+    // Ждем результат выполнения запроса
+    const result = await makeApiRequest('sendFileByUrl', 'POST', { chatId, urlFile: fileUrl, fileName }, e.target.id);
+    
+    // Если сервер вернул idMessage (файл успешно отправлен), очищаем поле ссылки
+    if (result && result.idMessage) {
+        fileUrlInput.value = '';
+    }
 });
