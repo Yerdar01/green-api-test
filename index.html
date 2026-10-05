@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREEN-API Test Task</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Левая колонка: Управление и вызовы методов -->
+        <div class="controls">
+            <div class="form-group">
+                <input type="text" id="idInstance" placeholder="idInstance" autocomplete="off">
+                <input type="password" id="ApiTokenInstance" placeholder="ApiTokenInstance" autocomplete="off" spellcheck="false">
+            </div>
+
+            <button id="btn-getSettings" type="button">getSettings</button>
+            <button id="btn-getStateInstance" type="button">getStateInstance</button>
+
+            <div class="form-group">
+                <input type="text" id="chatIdMessage" placeholder="77771234567">
+                <textarea id="messageText" placeholder="Hello World!"></textarea>
+                <button id="btn-sendMessage" type="button">sendMessage</button>
+            </div>
+
+            <div class="form-group">
+                <input type="text" id="chatIdFile" placeholder="77771234567">
+                <input type="text" id="fileUrl" placeholder="https://my.site.com/img/horse.png">
+                <button id="btn-sendFileByUrl" type="button">sendFileByUrl</button>
+            </div>
+        </div>
+
+        <!-- Правая колонка: Вывод ответа -->
+        <div class="result">
+            <label for="apiResponse">Ответ</label>
+            <textarea id="apiResponse" readonly placeholder="Здесь будет отображен JSON-ответ метода..."></textarea>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
